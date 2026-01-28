@@ -1,37 +1,50 @@
-import { View, Text, TouchableOpacity } from "react-native";
-import BottomSheet from "@gorhom/bottom-sheet";
+//import BottomSheet from "@gorhom/bottom-sheet";
+
+import { View, Text, Button, StyleSheet } from "react-native";
 
 export default function TractorBottomSheet({ tractor, onClose, onView }) {
   if (!tractor) return null;
 
   return (
-    <BottomSheet
-      index={0}
-      snapPoints={["30%"]}
-      onClose={onClose}
-    >
-      <View style={{ padding: 20 }}>
-        <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-          {tractor.name}
-        </Text>
+    <View style={styles.overlay}>
+      <View style={styles.container}>
+        <Text style={styles.title}>{tractor.name}</Text>
+        <Text>Propriétaire: {tractor.ownerName}</Text>
+        <Text>Prix: {tractor.pricePerHour} FCFA / Ha</Text>
 
-        <Text style={{ marginVertical: 10 }}>
-          {tractor.price} FCFA / jour
-        </Text>
-
-        <TouchableOpacity
-          onPress={onView}
-          style={{
-            backgroundColor: "#2e7d32",
-            padding: 14,
-            borderRadius: 8,
-          }}
-        >
-          <Text style={{ color: "white", textAlign: "center" }}>
-            Voir détails
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.actions}>
+          <Button title="Voir détails" onPress={onView} />
+          <Button title="Fermer" onPress={onClose} />
+        </View>
       </View>
-    </BottomSheet>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    zIndex: 9999,
+    elevation: 9999,
+  },
+  container: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  actions: {
+    marginTop: 12,
+    gap: 8,
+  },
+});
+
