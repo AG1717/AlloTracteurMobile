@@ -1,80 +1,238 @@
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from "react-native";
-import { useRouter } from "expo-router";
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { useContext, useEffect } from 'react';
+import {
+  Dimensions,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import TractorIcon from '../components/ui/TractorIcon';
+import { colors } from '../constants/colors';
+import { AuthContext } from './context/AuthContext';
 
-export default function HomeScreen() {
+const { width } = Dimensions.get('window');
+
+export default function WelcomeScreen() {
   const router = useRouter();
+  const { user, isLoading, isAuthenticated } = useContext(AuthContext);
+
+  // Auto-redirect si déjà connecté
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && user) {
+      if (user.role === 'admin') {
+        router.replace('/(admin)');
+      } else if (user.role === 'proprietaire') {
+        router.replace('/(owner)');
+      } else {
+        router.replace('/(client)');
+      }
+    }
+  }, [isLoading, isAuthenticated, user]);
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <TractorIcon size={80} color={colors.primary} />
+        <Text style={styles.loadingText}>Chargement...</Text>
+      </View>
+    );
+  }
 
   return (
-    <ImageBackground
-      source={{ uri: "https://images.unsplash.com/photo-1598514982205-f6f38f51e8d2" }}
-      style={styles.background}
-    >
-      <View style={styles.overlay}>
-        <Text style={styles.title}>Allô Tracteur 🚜</Text>
-        <Text style={styles.subtitle}>
-          Louez un tracteur près de chez vous, en quelques clics.
-        </Text>
+    <SafeAreaView style={styles.container}>
+      <LinearGradient
+        colors={[colors.primary, colors.primaryDark]}
+        style={styles.gradient}
+      >
+        {/* Logo Section */}
+        <View style={styles.logoSection}>
+          <View style={styles.logoContainer}>
+            <TractorIcon size={70} color={colors.textWhite} />
+          </View>
+          <Text style={styles.appName}>Allo Tracteur</Text>
+          <Text style={styles.tagline}>
+            Louez un tracteur près de chez vous
+          </Text>
+        </View>
 
-        <TouchableOpacity style={styles.primaryBtn} onPress={() => router.push("/map")}>
-          <Text style={styles.btnText}>Voir les tracteurs</Text>
-        </TouchableOpacity>
+        {/* Features */}
+        <View style={styles.featuresSection}>
+          {[
+            { icon: 'location', text: 'Trouvez des tracteurs à proximité' },
+            { icon: 'calendar', text: 'Réservez en quelques clics' },
+            { icon: 'card', text: 'Paiement sécurisé Orange Money & Wave' },
+          ].map((feature, index) => (
+            <View key={index} style={styles.featureItem}>
+              <View style={styles.featureIcon}>
+                <Ionicons name={feature.icon} size={20} color={colors.primary} />
+              </View>
+              <Text style={styles.featureText}>{feature.text}</Text>
+            </View>
+          ))}
+        </View>
 
-        <TouchableOpacity style={styles.secondaryBtn} onPress={() => router.push("/auth/login")}>
-          <Text style={styles.btnText}>Se connecter</Text>
-        </TouchableOpacity>
+        {/* Actions */}
+        <View style={styles.actionsSection}>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => router.push('/(auth)/login')}
+          >
+            <Text style={styles.primaryButtonText}>Se connecter</Text>
+            <Ionicons name="arrow-forward" size={20} color={colors.primary} />
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.linkBtn} onPress={() => router.push("/auth/register")}>
-          <Text style={styles.linkText}>Créer un compte</Text>
-        </TouchableOpacity>
-      </View>
-    </ImageBackground>
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() => router.push('/(auth)/register')}
+          >
+            <Text style={styles.secondaryButtonText}>Créer un compte</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.exploreButton}
+            onPress={() => router.push('/(client)')}
+          >
+            <Ionicons name="compass-outline" size={18} color={colors.primaryLight} />
+            <Text style={styles.exploreButtonText}>Explorer sans compte</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            En continuant, vous acceptez nos{' '}
+            <Text style={styles.footerLink}>conditions d'utilisation</Text>
+          </Text>
+        </View>
+      </LinearGradient>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
+  container: {
     flex: 1,
   },
-  overlay: {
+  gradient: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    padding: 24,
+    paddingHorizontal: 24,
   },
-  title: {
-    fontSize: 36,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 12,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.background,
   },
-  subtitle: {
+  loadingText: {
+    marginTop: 16,
     fontSize: 16,
-    color: "#eee",
-    marginBottom: 32,
+    color: colors.textSecondary,
   },
-  primaryBtn: {
-    backgroundColor: "#2E7D32",
-    padding: 16,
-    borderRadius: 8,
+  logoSection: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 60,
+  },
+  logoContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  appName: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: colors.textWhite,
+    marginBottom: 8,
+  },
+  tagline: {
+    fontSize: 16,
+    color: colors.primaryLight,
+    textAlign: 'center',
+  },
+  featuresSection: {
+    paddingVertical: 32,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  featureIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.textWhite,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  featureText: {
+    fontSize: 15,
+    color: colors.textWhite,
+    flex: 1,
+  },
+  actionsSection: {
+    paddingBottom: 24,
+  },
+  primaryButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.textWhite,
+    paddingVertical: 16,
+    borderRadius: 12,
     marginBottom: 12,
   },
-  secondaryBtn: {
-    backgroundColor: "#1565C0",
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
+  primaryButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.primary,
+    marginRight: 8,
   },
-  linkBtn: {
-    padding: 12,
-    alignItems: "center",
+  secondaryButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingVertical: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
-  btnText: {
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "bold",
+  secondaryButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.textWhite,
+    textAlign: 'center',
   },
-  linkText: {
-    color: "#fff",
-    textDecorationLine: "underline",
+  exploreButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  exploreButtonText: {
+    fontSize: 14,
+    color: colors.primaryLight,
+    marginLeft: 6,
+  },
+  footer: {
+    paddingBottom: 24,
+  },
+  footerText: {
+    fontSize: 12,
+    color: colors.primaryLight,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  footerLink: {
+    textDecorationLine: 'underline',
   },
 });
